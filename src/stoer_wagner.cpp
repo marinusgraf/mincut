@@ -7,6 +7,6 @@ int main(int argc, char** argv)
         std::cout << "invalid input" << std::endl;
         exit(EXIT_FAILURE);
     }
-    auto mat = file_to_adjmat(std::string{argv[1]});
-    std::cout << stoer_wagner(mat) << std::endl;
+    auto e = file_to_adjmat(std::string{argv[1]});
+    std::cout << stoer_wagner(e) << std::endl;
 }
