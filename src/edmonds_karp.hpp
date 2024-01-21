@@ -5,8 +5,8 @@ std::vector<int> shortest_path(std::vector<std::vector<int>> &e, int s, int t)
     int n = e[0].size();
     std::vector<bool> visited(n, false);
     visited[s] = true;
-    std::vector<int> frontier = {s}, next, parent(n, 0);
-    std::iota(parent.begin(), parent.end(), 0);
+    std::vector<int> frontier = {s}, next, p(n, 0);
+    std::iota(p.begin(), p.end(), 0);
     while (frontier.size() > 0)
     {
         next = {};
@@ -16,36 +16,36 @@ std::vector<int> shortest_path(std::vector<std::vector<int>> &e, int s, int t)
             {
                 if (e[v][u] > 0 && !visited[u])
                 {
-                    parent[u] = v;
+                    p[u] = v;
                     visited[u] = true;
                     next.push_back(u);
-                    if (u == t) return parent;
+                    if (u == t) return p;
                 }
             }
         }
         frontier = next;
     }
-    return parent;
+    return p;
 }
 
 int augment (std::vector<std::vector<int>> &e, int s, int t)
 {
-    std::vector<int> parent = shortest_path(e, s, t);
-    if (parent[t] == t) return 0;
+    std::vector<int> p = shortest_path(e, s, t);
+    if (p[t] == t) return 0;
     int bottleneck{INT_MAX};
     int v = t;
     do
     {
-        bottleneck = std::min(bottleneck, e[v][parent[v]]);
-        v = parent[v];
+        bottleneck = std::min(bottleneck, e[v][p[v]]);
+        v = p[v];
     }
     while (v != s);
     v = t;
     do
     {
-        e[v][parent[v]] -= bottleneck;
-        e[parent[v]][v] = e[v][parent[v]];
-        v = parent[v];
+        e[v][p[v]] -= bottleneck;
+        e[p[v]][v] = e[v][p[v]];
+        v = p[v];
     }
     while (v != s);
     return bottleneck;

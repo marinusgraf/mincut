@@ -1,6 +1,4 @@
-#include <vector>
-#include <algorithm>
-#include <random>
+#include "util.hpp"
 
 struct UnionFind
 { 
@@ -45,7 +43,6 @@ struct UnionFind
         }
         --sets;
     }
-
 };
 
 struct Edge { int src, dest, weight; };

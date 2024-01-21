@@ -13,10 +13,10 @@ edmonds_karp:
 	$(CPP) $(FLAGS) -o edmonds_karp src/edmonds_karp.cpp
 graphs:
 	rm graphs/generated/*
-	python3 graph_util/graph_generator.py
+	python3 graph_generator.py
 
 test: 
-	clang++ -g -std=c++23 -Wall -O3 -o test src/test.cpp
+	clang++ -g -std=c++23 -Wall -O0 -o test src/test.cpp
 
 all:
 	make -B karger

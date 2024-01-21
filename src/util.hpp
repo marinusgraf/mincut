@@ -1,15 +1,12 @@
-/* Used for converting input files into graph datastructures and 
-for multithreading Karger Algorithms */
-
 #pragma once
 #include <numeric>
 #include <iostream>
 #include <string>
 #include <fstream>
 #include <sstream>
-#include <unordered_set>
 #include <thread>
-#include "contract.hpp"
+#include <random>
+#include "karger.hpp"
 
 
 void thread_work(int (*func)(Graph g), Graph g, const int repetitions, std::atomic<int> &result)

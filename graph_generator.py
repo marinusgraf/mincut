@@ -12,10 +12,10 @@ def write_to_file(g, path):
 
 def assign_random_weights(g):
     for e in g.es:
-        e["weight"] = random.randint(1, 10000)
+        e["weight"] = random.randint(1, 1000)
 
-path = "../graphs/generated"
-for i in range(1, 6):
+path = "graphs/generated"
+for i in range(1, 5):
     n = i * 50;
     full_path = os.path.join(path, f"full{n}")
     full = ig.Graph.Full(n)
@@ -57,7 +57,6 @@ lattice10x10_path = os.path.join(path, f"lattice10x10")
 lattice10x10 = ig.Graph.Lattice([10, 10])
 assign_random_weights(lattice10x10)
 write_to_file(lattice10x10, lattice10x10_path)
-
 lattice15x15_path = os.path.join(path, f"lattice15x15")
 lattice15x15 = ig.Graph.Lattice([15,15])
 assign_random_weights(lattice15x15)

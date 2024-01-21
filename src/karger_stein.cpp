@@ -7,7 +7,6 @@ int main(int argc, char** argv)
         std::cout << "invalid or no input path" << std::endl;
         exit(EXIT_FAILURE);
     }
-    
     Graph g = file_to_graph(std::string{argv[1]});
     int n = g.partition.sets;
     long reps = log(n) * log(n) + 1;
