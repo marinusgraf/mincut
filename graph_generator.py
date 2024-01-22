@@ -12,10 +12,10 @@ def write_to_file(g, path):
 
 def assign_random_weights(g):
     for e in g.es:
-        e["weight"] = random.randint(1, 10000)
+        e["weight"] = random.randint(1, 5)
 
 path = "graphs/generated"
-for i in range(1, 6):
+for i in range(1, 5):
     n = i * 20;
     full_path = os.path.join(path, f"full{n}")
     full = ig.Graph.Full(n)

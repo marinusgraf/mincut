@@ -16,10 +16,8 @@ dinic:
 graphs:
 	rm graphs/generated/*
 	python3 graph_generator.py
-
 test: 
 	clang++ -g -std=c++23 -Wall -O0 -o test src/test.cpp src/adjmat.cpp
-
 all:
 	make -B karger
 	make -B karger_stein

@@ -1,9 +1,9 @@
 #include "adjmat.h"
 #include "edmonds_karp.h"
 
-std::vector<int> bfs(std::vector<std::vector<int>> &e, std::vector<int> &p, int s, int t)
+int bfs(std::vector<std::vector<int>> &e, std::vector<int> &p, int s, int t)
 {
-    std::vector<int> curr = {s}, next, d(n, -1);
+    std::vector<int> curr = {s}, next, d(n, -1), f(n, -1);
     d[s] = 0;
     for (int l = 0; curr.size() > 0; ++l)
     {
@@ -14,6 +14,14 @@ std::vector<int> bfs(std::vector<std::vector<int>> &e, std::vector<int> &p, int 
             {
                 if (e[u][v] > 0 && d[v] == -1)
                 {
+                    if (u == s)
+                    {
+                        f[v] = e[u][v];
+                    }
+                    else 
+                    {
+                        f[v] = std::min(f[u], e[u][v]);
+                    }
                     p[v] = u;
                     d[v] = l;
                     next.push_back(v);
@@ -22,7 +30,7 @@ std::vector<int> bfs(std::vector<std::vector<int>> &e, std::vector<int> &p, int 
         }
         curr = next;
     }
-    return d;
+    return f[t];
 }
 
 int augment(std::vector<std::vector<int>> &e, std::vector<int> p, int s, int t)
@@ -43,13 +51,18 @@ int augment(std::vector<std::vector<int>> &e, std::vector<int> p, int s, int t)
 
 int st_maxflow(std::vector<std::vector<int>> e, int s, int t)
 {
-    int f = 0;
+    int f, m = 0;
     std::vector<int> p(n, -1), d;
-    while (bfs(e, p, s, t)[t] != -1)
+    while ((f = bfs(e, p, s, t)) > 0)
     {
-        f += augment(e, p, s, t);
+        m += f;
+        for (int v = t; v != s; v = p[v])
+        {
+            e[p[v]][v] -= f;
+            e[v][p[v]] += f;
+        }
     }
-    return f;
+    return m;
 }
 
 int edmonds_karps(std::vector<std::vector<int>> &e)

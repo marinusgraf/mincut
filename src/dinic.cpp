@@ -24,56 +24,41 @@ std::vector<int> level(std::vector<std::vector<int>> e, int s, int t)
     return d;
 }
 
-bool dfs(std::vector<std::vector<int>> e, std::vector<int>& p, std::vector<int> d, int s, int t)
+int dfs(std::vector<std::vector<int>> &e, std::vector<int> d, int f, int u, int t)
 {
-    std::vector<int> stack;
-    stack.push_back(s);
-    int u;
-    while(stack.size() > 0)
+    if (u == t)
     {
-        u = stack[stack.size() - 1];
-        stack.pop_back();
-        if (u == t) return true;
-        for (int v = 0; v < e[u].size(); ++v)
+        return f;
+    }
+    for (int v = 0; v < n; ++v)
+    {
+        if (d[v] == d[u] + 1 && e[u][v] > 0)
         {
-            if (e[u][v] > 0 && (d[v] == d[u] + 1))
+            int tmp;
+            if( (tmp = dfs(e, d, std::min(f, e[u][v]), v, t)) > 0) 
             {
-                stack.push_back(v);
-                p[v] = u;
+                e[u][v] -= tmp;
+                e[v][u] += tmp;
+                return tmp;
             }
+            
         }
     }
-    return false;
-}
-
-int augment(std::vector<std::vector<int>> &e, std::vector<int> &p, int s, int t)
-{
-    int bottleneck = INT_MAX;
-    int v;
-    for (v = t; v != s; v = p[v])
-    {
-        bottleneck = std::min(bottleneck, e[v][p[v]]);
-    }
-    for (v = t; v != s; v = p[v])
-    {
-        e[v][p[v]] -= bottleneck;
-        e[p[v]][v] = e[v][p[v]];
-    }
-    return bottleneck;
+    return 0;
 }
 
 int st_maxflow(std::vector<std::vector<int>> e, int s, int t)
 {
-    int f = 0; 
+    int m = 0, f; 
     std::vector<int> d, p(n);
-    while ( (d = level(e, s, t))[t] != -1)
+    while ((d = level(e, s, t))[t] != -1)
     {
-        while (dfs(e, p, d, s, t))
+        while ((f = dfs(e, d, INT_MAX, s, t)) > 0)
         {
-            f += augment(e, p, s, t);
+            m += f;
         }
     }
-    return f;
+    return m;
 }
 
 int dinic(std::vector<std::vector<int>> e)
