@@ -33,4 +33,5 @@ def print_output(alg, result, time):
 algs = [Algorithm('Karger', ['./karger', '']),
          Algorithm('Karger-Stein', ['./karger_stein', '']),
            Algorithm('Edmonds-Karp', ['./edmonds_karp', '']),
-           Algorithm('Stoer-Wagner', ['./stoer_wagner', ''])]
+           Algorithm('Stoer-Wagner', ['./stoer_wagner', '']),
+           Algorithm('Dinic', ['./dinic', ''])]

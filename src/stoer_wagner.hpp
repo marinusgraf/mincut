@@ -1,4 +1,5 @@
-#include "util.hpp"
+#pragma once
+#include "adjmat.h"
 
 struct Node { int id, key;};
 

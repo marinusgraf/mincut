@@ -8,17 +8,17 @@ karger:
 karger_stein:
 	$(CPP) $(FLAGS) -o karger_stein src/karger_stein.cpp
 stoer_wagner:
-	$(CPP) $(FLAGS) -o stoer_wagner src/stoer_wagner.cpp
+	$(CPP) $(FLAGS) -o stoer_wagner src/stoer_wagner.cpp src/adjmat.cpp
 edmonds_karp:
-	$(CPP) $(FLAGS) -o edmonds_karp src/edmonds_karp.cpp
+	$(CPP) $(FLAGS) -o edmonds_karp src/edmonds_karp.cpp src/adjmat.cpp
 dinic:
-	$(CPP) $(FLAGS) -o dinic src/dinic.cpp
+	$(CPP) $(FLAGS) -o dinic src/dinic.cpp src/adjmat.cpp
 graphs:
 	rm graphs/generated/*
 	python3 graph_generator.py
 
 test: 
-	clang++ -g -std=c++23 -Wall -O0 -o test src/test.cpp
+	clang++ -g -std=c++23 -Wall -O0 -o test src/test.cpp src/flow.cpp src/adjmat.cpp
 
 all:
 	make -B karger
