@@ -28,4 +28,4 @@ all:
 	make -B dinic
 
 clean:
-	rm -r karger karger_stein stoer_wagner edmonds_karp *.dSYM __pycache__
+	rm -r karger karger_stein stoer_wagner edmonds_karp dinic *.dSYM __pycache__
