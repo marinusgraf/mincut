@@ -1,6 +1,45 @@
 #include "adjmat.h"
 #include "edmonds_karp.h"
-#include "flow.h"
+
+std::vector<int> bfs(std::vector<std::vector<int>> &e, std::vector<int> &p, int s, int t)
+{
+    std::vector<int> curr = {s}, next, d(n, -1);
+    d[s] = 0;
+    for (int l = 0; curr.size() > 0; ++l)
+    {
+        next = {};
+        for (int &u : curr)
+        {
+            for (int v = 0; v < n; ++v)
+            {
+                if (e[u][v] > 0 && d[v] == -1)
+                {
+                    p[v] = u;
+                    d[v] = l;
+                    next.push_back(v);
+                }
+            }
+        }
+        curr = next;
+    }
+    return d;
+}
+
+int augment(std::vector<std::vector<int>> &e, std::vector<int> p, int s, int t)
+{
+    int bottleneck{INT_MAX};
+    int v;
+    for (v = t; v != s; v = p[v])
+    {
+        bottleneck = std::min(bottleneck, e[v][p[v]]);
+    }
+    for (v = t; v != s; v = p[v])
+    {
+        e[v][p[v]] -= bottleneck;
+        e[p[v]][v] = e[v][p[v]];
+    }
+    return bottleneck;
+}
 
 int st_maxflow(std::vector<std::vector<int>> e, int s, int t)
 {
@@ -18,7 +57,7 @@ int edmonds_karps(std::vector<std::vector<int>> &e)
     int mincut = INT_MAX;   
     for (int s = 0; s < n; ++s)
     {
-        for (int t = s+1; t < n; ++t)
+        for (int t = s + 1; t < n; ++t)
         {
             mincut = std::min(mincut, st_maxflow(e, s, t));
         }
@@ -34,6 +73,5 @@ int main(int argc, char** argv)
         exit(EXIT_FAILURE);
     }
     file_to_adjmat(std::string{argv[1]});
-    std::cout << n << std::endl;
     std::cout << edmonds_karps(e) << std::endl;
 }

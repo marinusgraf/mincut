@@ -18,7 +18,7 @@ graphs:
 	python3 graph_generator.py
 
 test: 
-	clang++ -g -std=c++23 -Wall -O0 -o test src/test.cpp src/flow.cpp src/adjmat.cpp
+	clang++ -g -std=c++23 -Wall -O0 -o test src/test.cpp src/adjmat.cpp
 
 all:
 	make -B karger
