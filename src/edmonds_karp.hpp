@@ -53,8 +53,7 @@ int augment (std::vector<std::vector<int>> &e, int s, int t)
 
 int st_maxflow(std::vector<std::vector<int>> e, int s, int t)
 {
-    int maxflow = 0;
-    int augmented;
+    int maxflow = 0, augmented;
     while ((augmented = augment(e, s, t)) > 0)
     {   
         maxflow += augmented;

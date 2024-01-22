@@ -1,4 +1,4 @@
-#include "edmonds_karp.hpp"
+#include "dinic.hpp"
 
 int main(int argc, char** argv)
 {
@@ -8,5 +8,5 @@ int main(int argc, char** argv)
         exit(EXIT_FAILURE);
     }
     auto e = file_to_adjmat(std::string{argv[1]});
-    std::cout << edmonds_karps(e) << std::endl;
+    std::cout << dinic(e) << std::endl;
 }

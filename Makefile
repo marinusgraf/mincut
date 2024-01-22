@@ -11,6 +11,8 @@ stoer_wagner:
 	$(CPP) $(FLAGS) -o stoer_wagner src/stoer_wagner.cpp
 edmonds_karp:
 	$(CPP) $(FLAGS) -o edmonds_karp src/edmonds_karp.cpp
+dinic:
+	$(CPP) $(FLAGS) -o dinic src/dinic.cpp
 graphs:
 	rm graphs/generated/*
 	python3 graph_generator.py
@@ -23,6 +25,7 @@ all:
 	make -B karger_stein
 	make -B stoer_wagner
 	make -B edmonds_karp
+	make -B dinic
 
 clean:
 	rm -r karger karger_stein stoer_wagner edmonds_karp *.dSYM __pycache__
