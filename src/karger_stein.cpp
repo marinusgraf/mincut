@@ -1,4 +1,4 @@
-#include "util.hpp"
+#include "karger.h"
 
 int main(int argc, char** argv)
 {
