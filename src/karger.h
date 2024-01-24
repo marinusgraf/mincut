@@ -127,18 +127,19 @@ Graph contract(Graph g, const int resulting_size)
         rand_idx = dist(engine);
         g.partition.link(g.e[rand_idx].src, g.e[rand_idx].dest);
     }
-    auto is_self_edge = [&g](Edge edge)
+    auto self_loop = [&g](Edge edge)
     {
         return g.partition.find(edge.src) == g.partition.find(edge.dest);
     };
+
     int i = 0;
     while (i < m)
     {
-        if (is_self_edge(g.e[i]))
+        if (self_loop(g.e[i]))
         {
             --m;
-            g.e[i] = std::move(g.e[m]);
-            g.w[i] = std::move(g.w[m]);
+            g.e[i] = g.e[m];
+            g.w[i] = g.w[m];
         }
         else
         {
