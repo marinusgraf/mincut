@@ -56,13 +56,14 @@ struct UnionFind
 
 struct Edge
 {
-    int src, dest, weight;
+    int src, dest;
 };
 
 struct Graph
 {
     UnionFind partition;
-    std::vector<Edge> edges;
+    std::vector<Edge> e;
+    std::vector<int> w;
 };
 
 Graph file_to_graph(std::string path)
@@ -87,8 +88,10 @@ Graph file_to_graph(std::string path)
         std::cerr << ("Error, first line does not contain node and edge count") << std::endl;
         exit(EXIT_FAILURE);
     }
-    std::vector<Edge> edges;
-    edges.reserve(m);
+    std::vector<Edge> e;
+    e.reserve(m);
+    std::vector<int> w;
+    w.reserve(m);
     int src, dest, weight;
     while (std::getline(file, line))
     {
@@ -106,24 +109,23 @@ Graph file_to_graph(std::string path)
         dest = vals[1];
         weight = vals[2];
         if (src == dest)
-            continue; // ignore self edges
-        edges.push_back(Edge{src, dest, weight});
+            continue; // ignore self e
+        e.push_back(Edge{src, dest});
+        w.push_back(weight);
     }
-    return Graph{UnionFind{n}, std::move(edges)};
+    return Graph{UnionFind{n}, std::move(e), std::move(w)};
 }
 
 Graph contract(Graph g, const int resulting_size)
 {
     int rand_idx;
-    int m = g.edges.size();
-    std::vector<int> weights(m, 0);
-    for (int i = 0; i < m; ++i) weights[i] = g.edges[i].weight;
+    int m = g.e.size();
     static std::default_random_engine engine{std::random_device{}()};
-    std::discrete_distribution<int> dist{weights.begin(), weights.end()};
+    std::discrete_distribution<int> dist{g.w.begin(), g.w.end()};
     while (g.partition.sets != resulting_size)
     {
         rand_idx = dist(engine);
-        g.partition.link(g.edges[rand_idx].src, g.edges[rand_idx].dest);
+        g.partition.link(g.e[rand_idx].src, g.e[rand_idx].dest);
     }
     auto is_self_edge = [&g](Edge edge)
     {
@@ -132,16 +134,19 @@ Graph contract(Graph g, const int resulting_size)
     int i = 0;
     while (i < m)
     {
-        if (is_self_edge(g.edges[i]))
+        if (is_self_edge(g.e[i]))
         {
-            g.edges[i] = g.edges[--m];
+            --m;
+            g.e[i] = std::move(g.e[m]);
+            g.w[i] = std::move(g.w[m]);
         }
         else
         {
             ++i;
         }
     }
-    g.edges.resize(i);
+    g.e.resize(i);
+    g.w.resize(i);
     return g;
 }
 
@@ -149,9 +154,9 @@ int karger(Graph g)
 {
     g = contract(g, 2);
     int ret = 0;
-    for (auto &e : g.edges)
+    for (auto &w : g.w)
     {
-        ret += e.weight;
+        ret += w;
     }
     return ret;
 }
