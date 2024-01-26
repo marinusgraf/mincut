@@ -24,28 +24,25 @@ std::vector<int> level(std::vector<std::vector<int>> &e, int s, int t)
     return d;
 }
 
-int dfs(std::vector<std::vector<int>> &e, std::vector<int> &d, std::vector<bool> &vis, int f, int &u, int &t)
+int dfs(std::vector<std::vector<int>> &e, std::vector<int> &d, std::vector<bool> &vis, int flow, int u, int t)
 {
-    vis[u] = true;
     if (u == t)
-    {
-        return f;
-    }
+        return flow;
+    vis[u] = true;
     for (int v = 0; v < n; ++v)
     {
-        if (!vis[v] && d[v] == d[u] + 1 && e[u][v] > 0)
+        if (!vis[v] && e[u][v] > 0 && d[v] == d[u] + 1)
         {
-            f = std::min(f, e[u][v]);
-            int push;
-            if ((push = dfs(e, d, vis, f, v, t)) > 0)
+            int push = std::min(flow, e[u][v]);
+            int f;
+            if ( (f = dfs(e, d, vis, push, v, t)) > 0)
             {
-                f = std::min(f, push);
                 e[u][v] -= f;
-                return std::min(f, push);
+                return f;
             }
         }
     }
-    return 0;
+    return 0;    
 }
 
 int st_maxflow(std::vector<std::vector<int>> e, int s, int t)
@@ -55,11 +52,12 @@ int st_maxflow(std::vector<std::vector<int>> e, int s, int t)
     std::vector<bool> vis;
     while ((d = level(e, s, t))[t] != -1)
     {
-        vis = std::vector<bool>(n, false);
-        while ( (f = dfs(e, d, vis, INT_MAX, s, t)) > 0)
-        {
+       do
+       {
+            vis = std::vector<bool>(n, false);
             m += f;
-        }
+       } while ((f = dfs(e, d, vis, INT_MAX, s, t)) > 0);
+       
     }
     return m;
 }

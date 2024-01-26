@@ -3,16 +3,17 @@
 
 int bfs(std::vector<std::vector<int>> &e, std::vector<int> &p, int s, int t)
 {
-    std::vector<int> curr = {s}, next, d(n, -1), f(n, -1);
-    d[s] = 0;
-    for (int l = 0; curr.size() > 0; ++l)
+    std::vector<int> curr = {s}, next, f(n, -1);
+    std::vector<bool> vis(n, false);
+    vis[s] = true;
+    while (curr.size() > 0)
     {
         next = {};
         for (int &u : curr)
         {
             for (int v = 0; v < n; ++v)
             {
-                if (e[u][v] > 0 && d[v] == -1)
+                if (e[u][v] > 0 && !vis[v])
                 {
                     if (u == s)
                     {
@@ -23,7 +24,7 @@ int bfs(std::vector<std::vector<int>> &e, std::vector<int> &p, int s, int t)
                         f[v] = std::min(f[u], e[u][v]);
                     }
                     p[v] = u;
-                    d[v] = l;
+                    vis[v] = true;
                     next.push_back(v);
                 }
             }

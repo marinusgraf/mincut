@@ -88,12 +88,10 @@ Graph file_to_graph(std::string path)
         std::cerr << ("Error, first line does not contain node and edge count") << std::endl;
         exit(EXIT_FAILURE);
     }
-    std::vector<Edge> e;
-    e.reserve(m);
-    std::vector<int> w;
-    w.reserve(m);
+    std::vector<Edge> e(m);
+    std::vector<int> w(m);
     int src, dest, weight;
-    while (std::getline(file, line))
+    for (int k = 0; std::getline(file, line) && k < m; ++k)
     {
         int vals[3];
         int i;
@@ -109,9 +107,9 @@ Graph file_to_graph(std::string path)
         dest = vals[1];
         weight = vals[2];
         if (src == dest)
-            continue; // ignore self e
-        e.push_back(Edge{src, dest});
-        w.push_back(weight);
+            continue; // ignore self edges
+        e[k] = Edge{src, dest};
+        w[k] = weight;
     }
     return Graph{UnionFind{n}, std::move(e), std::move(w)};
 }
@@ -127,15 +125,14 @@ Graph contract(Graph g, const int resulting_size)
         rand_idx = dist(engine);
         g.partition.link(g.e[rand_idx].src, g.e[rand_idx].dest);
     }
-    auto self_loop = [&g](Edge edge)
+    auto is_self_edge = [&g](Edge e)
     {
-        return g.partition.find(edge.src) == g.partition.find(edge.dest);
+        return g.partition.find(e.src) == g.partition.find(e.dest);
     };
-
     int i = 0;
     while (i < m)
     {
-        if (self_loop(g.e[i]))
+        if (is_self_edge(g.e[i]))
         {
             --m;
             g.e[i] = g.e[m];
