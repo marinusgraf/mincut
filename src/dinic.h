@@ -38,6 +38,7 @@ int dfs(std::vector<std::vector<int>> &e, std::vector<int> &d, std::vector<bool>
             if ( (f = dfs(e, d, vis, push, v, t)) > 0)
             {
                 e[u][v] -= f;
+                e[v][u] += f;
                 return f;
             }
         }
