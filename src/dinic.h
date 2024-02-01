@@ -1,21 +1,21 @@
 #pragma once
 #include "adjmat.h"
 
-std::vector<int> level(std::vector<std::vector<int>> &e, int s, int t)
+std::vector<int> level(Graph &g, int s, int t)
 {
-    std::vector<int> frontier = {s}, next, d(n, -1);
+    std::vector<int> frontier = {s}, next, d(g.n, -1);
     d[s] = 0;
     for (int l = 1; frontier.size() > 0; ++l)
     {
         next = {};
         for (int &u : frontier)
         {
-            for (int v = 0; v < n; ++v)
+            for (Edge &e : g.adj[u])
             {
-                if (e[u][v] > 0 && d[v] == -1)
+                if (e.cap > 0 && d[e.dest] == -1)
                 {
-                    next.push_back(v);
-                    d[v] = l;
+                    next.push_back(e.dest);
+                    d[e.dest] = l;
                 }
             }
         }
@@ -24,21 +24,21 @@ std::vector<int> level(std::vector<std::vector<int>> &e, int s, int t)
     return d;
 }
 
-int dfs(std::vector<std::vector<int>> &e, std::vector<int> &d, std::vector<bool> &vis, int flow, int u, int t)
+int dfs(Graph &g, std::vector<int> &d, std::vector<bool> &vis, int flow, int u, int t)
 {
     if (u == t)
         return flow;
     vis[u] = true;
-    for (int v = 0; v < n; ++v)
+    for (Edge &e : g.adj[u])
     {
-        if (!vis[v] && e[u][v] > 0 && d[v] == d[u] + 1)
+        if (!vis[e.dest] && e.cap > 0 && d[e.dest] == d[u] + 1)
         {
-            int push = std::min(flow, e[u][v]);
+            int push = std::min(flow, e.cap);
             int f;
-            if ( (f = dfs(e, d, vis, push, v, t)) > 0)
+            if ( (f = dfs(g, d, vis, push, e.dest, t)) > 0)
             {
-                e[u][v] -= f;
-                e[v][u] += f;
+                e.cap -= f;
+                (*e.rev).cap += f;
                 return f;
             }
         }
@@ -46,31 +46,31 @@ int dfs(std::vector<std::vector<int>> &e, std::vector<int> &d, std::vector<bool>
     return 0;    
 }
 
-int st_maxflow(std::vector<std::vector<int>> e, int s, int t)
+int st_maxflow(Graph g, int s, int t)
 {
     int m = 0, f = 0;
-    std::vector<int> d, p(n);
+    std::vector<int> d, p(g.n);
     std::vector<bool> vis;
-    while ((d = level(e, s, t))[t] != -1)
+    while ((d = level(g, s, t))[t] != -1)
     {
        do
        {
-            vis = std::vector<bool>(n, false);
+            vis = std::vector<bool>(g.n, false);
             m += f;
-       } while ((f = dfs(e, d, vis, INT_MAX, s, t)) > 0);
+       } while ((f = dfs(g, d, vis, INT_MAX, s, t)) > 0);
        
     }
     return m;
 }
 
-int dinic(std::vector<std::vector<int>> &e)
+int dinic(Graph &g)
 {
     int mincut = INT_MAX;
-    for (int s = 0; s < n; ++s)
+    for (int s = 0; s < g.n; ++s)
     {
-        for (int t = s + 1; t < n; ++t)
+        for (int t = s + 1; t < g.n; ++t)
         {
-            mincut = std::min(mincut, st_maxflow(e, s, t));
+            mincut = std::min(mincut, st_maxflow(g, s, t));
         }
     }
     return mincut;
