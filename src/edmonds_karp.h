@@ -1,7 +1,7 @@
 #pragma once
 #include "adjmat.h"
 
-int bfs(Graph &g, std::vector<Edge*> &p, int s, int t)
+int bfs(Graph &g, std::vector<Edge> &p, int s, int t)
 {
     std::vector<int> curr = {s}, next, f(g.n, -1);
     std::vector<bool> vis(g.n, false);
@@ -13,18 +13,18 @@ int bfs(Graph &g, std::vector<Edge*> &p, int s, int t)
         {
             for (Edge &e : g.adj[u])
             {
-                int v = e.dest;
-                if (e.cap > 0 && !vis[v])
+                int v = e.to;
+                if (g.cap[e.id] > 0 && !vis[v])
                 {
                     if (u == s)
                     {
-                        f[v] = e.cap;
+                        f[v] = g.cap[e.id];
                     }
                     else
                     {
-                        f[v] = std::min(f[u], e.cap);
+                        f[v] = std::min(f[u], g.cap[e.id]);
                     }
-                    p[v] = &e;
+                    p[v] = e;
                     vis[v] = true;
                     next.push_back(v);
                 }
@@ -38,14 +38,14 @@ int bfs(Graph &g, std::vector<Edge*> &p, int s, int t)
 int st_maxflow(Graph g, int s, int t)
 {
     int f, m = 0;
-    std::vector<Edge*> p(g.n), d;
+    std::vector<Edge> p(g.n), d;
     while ((f = bfs(g, p, s, t)) > 0)
     {
         m += f;
-        for (int v = t; v != s; v = p[v]->src)
+        for (int v = t; v != s; v = p[v].from)
         {
-            p[v]->cap -= f;
-            p[v]->rev->cap = -p[v]->cap;
+            g.cap[p[v].id] -= f;
+            g.cap[p[v].id + 1] += f;
         }
     }
     return m;

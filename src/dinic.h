@@ -1,5 +1,5 @@
 #pragma once
-#include "adjmat.h"
+#include "adjlist.h"
 
 std::vector<int> level(Graph &g, int s, int t)
 {
@@ -12,10 +12,10 @@ std::vector<int> level(Graph &g, int s, int t)
         {
             for (Edge &e : g.adj[u])
             {
-                if (e.cap > 0 && d[e.dest] == -1)
+                if (g.cap[e.id] > 0 && d[e.to] == -1)
                 {
-                    next.push_back(e.dest);
-                    d[e.dest] = l;
+                    next.push_back(e.to);
+                    d[e.to] = l;
                 }
             }
         }
@@ -31,14 +31,14 @@ int dfs(Graph &g, std::vector<int> &d, std::vector<bool> &vis, int flow, int u, 
     vis[u] = true;
     for (Edge &e : g.adj[u])
     {
-        if (!vis[e.dest] && e.cap > 0 && d[e.dest] == d[u] + 1)
+        if (!vis[e.to] && g.cap[e.id] > 0 && d[e.to] == d[u] + 1)
         {
-            int push = std::min(flow, e.cap);
+            int push = std::min(flow, g.cap[e.id]);
             int f;
-            if ( (f = dfs(g, d, vis, push, e.dest, t)) > 0)
+            if ( (f = dfs(g, d, vis, push, e.to, t)) > 0)
             {
-                e.cap -= f;
-                (*e.rev).cap += f;
+                g.cap[e.id] -= f;
+                g.cap[e.id + 1] += f;
                 return f;
             }
         }
@@ -48,7 +48,7 @@ int dfs(Graph &g, std::vector<int> &d, std::vector<bool> &vis, int flow, int u, 
 
 int st_maxflow(Graph g, int s, int t)
 {
-    int m = 0, f = 0;
+    int maxflow = 0, flow = 0;
     std::vector<int> d, p(g.n);
     std::vector<bool> vis;
     while ((d = level(g, s, t))[t] != -1)
@@ -56,11 +56,11 @@ int st_maxflow(Graph g, int s, int t)
        do
        {
             vis = std::vector<bool>(g.n, false);
-            m += f;
-       } while ((f = dfs(g, d, vis, INT_MAX, s, t)) > 0);
+            maxflow += flow;
+       } while ((flow = dfs(g, d, vis, INT_MAX, s, t)) > 0);
        
     }
-    return m;
+    return maxflow;
 }
 
 int dinic(Graph &g)
