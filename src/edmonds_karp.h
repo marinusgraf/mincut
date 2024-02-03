@@ -1,5 +1,5 @@
 #pragma once
-#include "adjmat.h"
+#include "adjlist.h"
 
 int bfs(Graph &g, std::vector<Edge> &p, int s, int t)
 {
@@ -45,7 +45,7 @@ int st_maxflow(Graph g, int s, int t)
         for (int v = t; v != s; v = p[v].from)
         {
             g.cap[p[v].id] -= f;
-            g.cap[p[v].id + 1] += f;
+            g.cap[p[v].id ^ 1] += f;
         }
     }
     return m;
