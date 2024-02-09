@@ -2,12 +2,14 @@
 
 int main(int argc, char** argv)
 {
+    
     if (argc != 2) 
     {
         std::cout << "invalid or no input path" << std::endl;
         exit(EXIT_FAILURE);
     }
     Graph g = file_to_graph(std::string{argv[1]});
+    /*
     int n = g.n;
     long reps = log(n) * log(n) + 1;
     int nb_threads = std::thread::hardware_concurrency();
@@ -23,4 +25,6 @@ int main(int argc, char** argv)
         threads[i].join();
     }
     std::cout << min_cut << std::endl;
+    */
+    std::cout << karger_stein(g) << std::endl;
 }

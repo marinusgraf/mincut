@@ -72,12 +72,14 @@ Graph file_to_adjmat(std::string path)
 Graph contract(Graph g, int t)
 {
     static std::default_random_engine engine{std::random_device{}()};
+    std::vector<bool> merged(g.n, false);
     int u, v;
     int n = g.n;
     while (n != t)
     {
         u = std::discrete_distribution<>{g.d.begin(), g.d.end()}(engine);
         v = std::discrete_distribution<>{g.w[u].begin(), g.w[u].end()}(engine);
+        merged[v] = true;
         g.d[u] = g.d[u] + g.d[v] - 2*g.w[u][v];
         g.d[v] = g.w[u][v] = g.w[v][u] = 0;
         for (int w = 0; w < g.n; ++w)
@@ -89,16 +91,70 @@ Graph contract(Graph g, int t)
         }
         --n;
     }
-    for (int v = 0; v < g.n; ++v)
+    auto w = std::vector<std::vector<int>>(n,std::vector<int>(n));
+    auto d = std::vector<int>(n);
+    int new_row = 0, new_col = 0;
+    for (int old_row = 0; old_row < g.n; ++old_row)
     {
-        if (g.d[v] > 0) return g.d[v];
+        if (merged[old_row])
+        {
+            continue;
+        }
+        new_col = 0;
+        for (int old_col = 0; old_col < g.n; ++old_col)
+        {
+            if(merged[old_col])
+            {
+                continue;
+            }
+            w[new_row][new_col] = g.w[old_row][old_col];
+            ++new_col;
+        }
+        ++new_row;
     }
-    return 0;
+    int k = 0;
+    for (int i = 0; i < g.n; ++i)
+    {
+        if(merged[i])
+        {
+            continue;
+        }
+        d[k] = g.d[i];
+        ++k;
+    }
+    g.n = n;
+    g.w = w;
+    g.d = d;
+    return g;
+    
+}
+
+int karger(Graph &g)
+{
+    g = contract(g, 2);
+    return g.w[0][1];
+}
+
+int karger_stein(Graph g)
+{
+    if (g.n <= 6)
+    {
+        return karger(g);
+    }
+    else
+    {
+        int t = std::ceil(g.n / std::sqrt(2) + 1);
+        return std::min
+        (
+            karger_stein(contract(g, t)),
+            karger_stein(contract(g, t))
+        );
+    }
 }
 
 int main(int argc, char **argv)
 {
     Graph g = file_to_adjmat(argv[1]);
-    std::cout << contract(g, 2) << std::endl;
+    std::cout << karger_stein(g) << std::endl;
     return 0;
 }

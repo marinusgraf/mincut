@@ -77,20 +77,20 @@ struct MaxHeap
     }
 };
 
-int stoer_wagner(std::vector<std::vector<int>> e)
+int stoer_wagner(Graph g)
 {
-    int k = n;
+    int k = g.n;
     int min_cut = INT_MAX;
-    std::vector<bool> merged(n, false);
+    std::vector<bool> merged(g.n, false);
     while (k > 1)
     {
         int max;
         int s = 0, t = 0;
         MaxHeap q;
-        for (int v = 1; v < n; ++v)
+        for (int v = 1; v < g.n; ++v)
         {
             if (!merged[v])
-                q.insert(Node{v, e[0][v]});
+                q.insert(Node{v, g.c[0][v]});
         }
         while (q.a.size() > 0)
         {
@@ -100,15 +100,15 @@ int stoer_wagner(std::vector<std::vector<int>> e)
             max = tmp.key;
             for (Node &v : q.a)
             {
-                q.increase_key(v.id, e[v.id][t]);
+                q.increase_key(v.id, g.c[v.id][t]);
             }
         }
         min_cut = std::min(min_cut, max);
         merged[t] = true;
-        for (int v = 0; v < n; ++v)
+        for (int v = 0; v < g.n; ++v)
         {
-            e[s][v] += e[t][v];
-            e[v][s] = e[s][v];
+            g.c[s][v] += g.c[t][v];
+            g.c[v][s] = g.c[s][v];
         }
         --k;
     }

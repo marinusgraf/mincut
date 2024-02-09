@@ -7,6 +7,6 @@ int main(int argc, char** argv)
         std::cout << "invalid input" << std::endl;
         exit(EXIT_FAILURE);
     }
-    file_to_adjmat(std::string{argv[1]});
-    std::cout << edmonds_karps(e) << std::endl;
+    Graph g = file_to_graph(std::string{argv[1]});
+    std::cout << edmonds_karps(g) << std::endl;
 }

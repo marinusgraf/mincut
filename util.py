@@ -29,9 +29,13 @@ def print_output(alg, result, time):
         •{alg.name}'s Algorithm:
             -mincut value: {result.stdout.rstrip()}
             -time taken: {time:.2f} seconds""")
-
+"""
 algs = [Algorithm('Karger', ['./karger', '']),
+        Algorithm('Karg', ['./karg', '']),
          Algorithm('Karger-Stein', ['./karger_stein', '']),
            Algorithm('Edmonds-Karp', ['./edmonds_karp', '']),
            Algorithm('Stoer-Wagner', ['./stoer_wagner', '']),
            Algorithm('Dinic', ['./dinic', ''])]
+"""
+algs = [Algorithm('Karg', ['./karg', '']),
+         Algorithm('Stoer Wagner', ['./stoer_wagner', ''])]
