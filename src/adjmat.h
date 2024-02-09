@@ -5,10 +5,25 @@
 #include <iostream>
 #include <algorithm>
 
-int n, m;
-std::vector<std::vector<int>> e;
 
-void file_to_adjmat(std::string path)
+struct Edge 
+{
+    int src, dest, cap;
+    Edge *rev;
+};
+
+struct Path
+{
+    Edge *curr, *prev;
+};
+
+struct Graph 
+{
+    int n, m;
+    std::vector<std::vector<Edge>> adj;
+};
+
+Graph file_to_adjmat(std::string path)
 {
     std::ifstream file(path);
     if (!file)
@@ -21,14 +36,15 @@ void file_to_adjmat(std::string path)
     {
         if (line[0] != '#') break;
     }
+    int n, m, src, dest, cap;
     std::istringstream st(line);
     if (!(st >> n >> m))
     {
         std::cerr << ("Error, first line does not contain node and edge count") << std::endl;
         exit(EXIT_FAILURE);
     }
-    e = std::vector<std::vector<int>>(n, std::vector<int>(n, 0));
-    int src, dest, weight;
+    Graph g{n, m, std::vector<std::vector<Edge>>(n, std::vector<Edge>())};
+    std::vector<Edge> e;
     while (std::getline(file, line))
     {
             int vals[3];
@@ -40,16 +56,15 @@ void file_to_adjmat(std::string path)
                 line.erase(0, pos + 1);
             }
             if (i < 3) vals[2] = 1;
-            src = vals[0]; dest = vals[1]; weight = vals[2];
+            src = vals[0]; dest = vals[1]; cap = vals[2];
             if (src == dest) continue;
-            if (e[src][dest] == 0)
-            {
-                e[src][dest] = weight;
-            }
-            else
-            {
-                e[src][dest] += weight; 
-            }
-            e[dest][src] = e[src][dest];
+
+            e.push_back({src,dest,cap});
+            e.push_back({dest,src,cap});
+            e[e.size() - 2].rev = &e[e.size() - 1];
+            e[e.size() - 1].rev = &e[e.size() - 2];
+            g.adj[src].push_back(std::move(e[e.size() - 2]));
+            g.adj[dest].push_back(std::move(e[e.size() - 1]));
     }
+    return g;
 }
