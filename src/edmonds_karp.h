@@ -1,30 +1,29 @@
 #pragma once
-#include "adjlist.h"
+#include "adjmat.h"
 
-int bfs(Graph &g, std::vector<Edge> &p, int s, int t)
+int bfs(std::vector<std::vector<int>> &e, std::vector<int> &p, int s, int t)
 {
-    std::vector<int> curr = {s}, next, f(g.n, -1);
-    std::vector<bool> vis(g.n, false);
+    std::vector<int> curr = {s}, next, f(n, -1);
+    std::vector<bool> vis(n, false);
     vis[s] = true;
     while (curr.size() > 0)
     {
         next = {};
         for (int &u : curr)
         {
-            for (Edge &e : g.adj[u])
+            for (int v = 0; v < n; ++v)
             {
-                int v = e.to;
-                if (g.cap[e.id] > 0 && !vis[v])
+                if (e[u][v] > 0 && !vis[v])
                 {
                     if (u == s)
                     {
-                        f[v] = g.cap[e.id];
+                        f[v] = e[u][v];
                     }
                     else
                     {
-                        f[v] = std::min(f[u], g.cap[e.id]);
+                        f[v] = std::min(f[u], e[u][v]);
                     }
-                    p[v] = e;
+                    p[v] = u;
                     vis[v] = true;
                     next.push_back(v);
                 }
@@ -35,31 +34,28 @@ int bfs(Graph &g, std::vector<Edge> &p, int s, int t)
     return f[t];
 }
 
-int st_maxflow(Graph g, int s, int t)
+int st_maxflow(std::vector<std::vector<int>> e, int s, int t)
 {
     int f, m = 0;
-    std::vector<Edge> p(g.n), d;
-    while ((f = bfs(g, p, s, t)) > 0)
+    std::vector<int> p(n, -1), d;
+    while ((f = bfs(e, p, s, t)) > 0)
     {
         m += f;
-        for (int v = t; v != s; v = p[v].from)
+        for (int v = t; v != s; v = p[v])
         {
-            g.cap[p[v].id] -= f;
-            g.cap[p[v].id ^ 1] += f;
+            e[p[v]][v] -= f;
+            e[v][p[v]] += f;
         }
     }
     return m;
 }
 
-int edmonds_karp(Graph &g)
+int edmonds_karps(std::vector<std::vector<int>> &e)
 {
     int mincut = INT_MAX;
-    for (int s = 0; s < g.n; ++s)
+    for (int t = 1; t < n; ++t)
     {
-        for (int t = s + 1; t < g.n; ++t)
-        {
-            mincut = std::min(mincut, st_maxflow(g, s, t));
-        }
+        mincut = std::min(mincut, st_maxflow(e, 0, t));
     }
     return mincut;
 }

@@ -8,7 +8,7 @@ int main(int argc, char** argv)
         exit(EXIT_FAILURE);
     }
     Graph g = file_to_graph(std::string{argv[1]});
-    int n = g.partition.sets;
+    int n = g.n;
     long reps = n * n * log(n) + 1;
     int nb_threads = std::thread::hardware_concurrency();
     long reps_per_thread = std::ceil(reps / nb_threads) + 1;

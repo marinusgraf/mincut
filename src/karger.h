@@ -1,18 +1,24 @@
 #pragma once
-#include <numeric>
-#include <iostream>
-#include <string>
+#include <vector>
 #include <fstream>
 #include <sstream>
+#include <iostream>
+#include <algorithm>
 #include <thread>
 #include <random>
 
-struct UnionFind
+struct Edge 
 {
-    int sets;
-    std::vector<int> parent, rank;
+    int from, to;
+};
 
-    UnionFind(int n) : sets{n}
+struct Graph
+{
+    int n;
+    std::vector<Edge> e;
+    std::vector<int> w, parent, rank;
+
+    Graph(int n) : n{n}
     {
         parent.reserve(n);
         rank.reserve(n);
@@ -50,20 +56,9 @@ struct UnionFind
         {
             rank[x] += 1;
         }
-        --sets;
+        --n;
     }
-};
 
-struct Edge
-{
-    int src, dest;
-};
-
-struct Graph
-{
-    UnionFind partition;
-    std::vector<Edge> e;
-    std::vector<int> w;
 };
 
 Graph file_to_graph(std::string path)
@@ -80,16 +75,16 @@ Graph file_to_graph(std::string path)
         if (line[0] != '#')
             break;
     }
-    int n;
-    int m;
+    int n, m;
     std::istringstream st(line);
     if (!(st >> n >> m))
     {
         std::cerr << ("Error, first line does not contain node and edge count") << std::endl;
         exit(EXIT_FAILURE);
     }
-    std::vector<Edge> e(m);
-    std::vector<int> w(m);
+    Graph g{n};
+    g.e = std::vector<Edge>(m);
+    g.w = std::vector<int>(m);
     int src, dest, weight;
     for (int k = 0; std::getline(file, line) && k < m; ++k)
     {
@@ -108,31 +103,31 @@ Graph file_to_graph(std::string path)
         weight = vals[2];
         if (src == dest)
             continue; // ignore self edges
-        e[k] = Edge{src, dest};
-        w[k] = weight;
+        g.e[k] = Edge{src, dest};
+        g.w[k] = weight;
     }
-    return Graph{UnionFind{n}, std::move(e), std::move(w)};
+    return g;
 }
 
-Graph contract(Graph g, const int resulting_size)
+Graph contract(Graph g, int t)
 {
-    int rand_idx;
+    int idx;
     int m = g.e.size();
-    static std::default_random_engine engine{std::random_device{}()};
-    std::discrete_distribution<int> dist{g.w.begin(), g.w.end()};
-    while (g.partition.sets != resulting_size)
+    auto self_edge = [&g](Edge e)
     {
-        rand_idx = dist(engine);
-        g.partition.link(g.e[rand_idx].src, g.e[rand_idx].dest);
-    }
-    auto is_self_edge = [&g](Edge e)
-    {
-        return g.partition.find(e.src) == g.partition.find(e.dest);
+        return g.find(e.from) == g.find(e.to);
     };
+    static std::default_random_engine engine{std::random_device{}()};
+    std::discrete_distribution<> dist{g.w.begin(), g.w.end()};
+    while (g.n != t)
+    {
+        idx = dist(engine);
+        g.link(g.e[idx].from, g.e[idx].to);
+    }
     int i = 0;
     while (i < m)
     {
-        if (is_self_edge(g.e[i]))
+        if (self_edge(g.e[i]))
         {
             --m;
             g.e[i] = g.e[m];
@@ -151,26 +146,26 @@ Graph contract(Graph g, const int resulting_size)
 int karger(Graph g)
 {
     g = contract(g, 2);
-    int ret = 0;
-    for (auto &w : g.w)
+    int res = 0;
+    for (int i = 0; i < g.w.size(); ++i)
     {
-        ret += w;
+        res += g.w[i];
     }
-    return ret;
+    return res;
 }
 
 int karger_stein(Graph g)
 {
-    if (g.partition.sets <= 6)
+    if (g.n <= 6)
     {
         return karger(g);
     }
     else
     {
-        int contracted_graph_size = std::ceil(g.partition.sets / std::sqrt(2) + 1);
+        int t = std::ceil(g.n / std::sqrt(2) + 1);
         return std::min(
-            karger_stein(contract(g, contracted_graph_size)),
-            karger_stein(contract(g, contracted_graph_size)));
+            karger_stein(contract(g, t)),
+            karger_stein(contract(g, t)));
     }
 }
 

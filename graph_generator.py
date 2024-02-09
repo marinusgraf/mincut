@@ -16,7 +16,7 @@ def assign_random_weights(g):
 
 path = "graphs/generated"
 for i in range(1, 6):
-    n = i * 20;
+    n = i * 60;
     full_path = os.path.join(path, f"full{n}")
     full = ig.Graph.Full(n)
     assign_random_weights(full)

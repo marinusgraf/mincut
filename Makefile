@@ -18,6 +18,10 @@ graphs:
 	python3 graph_generator.py
 test: 
 	clang++ -g -std=c++23 -Wall -O0 -o test src/test.cpp 
+karg:
+	clang++ -g -std=c++23 -Wall -O0 -o karg src/karg.cpp
+kar:
+	clang++ -g -std=c++23 -Wall -O3 -o kar src/kar.cpp 
 all:
 	make -B karger
 	make -B karger_stein

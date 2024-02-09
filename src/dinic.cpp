@@ -7,7 +7,7 @@ int main(int argc, char** argv)
         std::cout << "invalid input" << std::endl;
         exit(EXIT_FAILURE);
     }
-    Graph g = file_to_adjmat(std::string{argv[1]});
-    std::cout << dinic(g) << std::endl;
+    file_to_adjmat(std::string{argv[1]});
+    std::cout << dinic(e) << std::endl;
     
 }
