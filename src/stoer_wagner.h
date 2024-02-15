@@ -3,27 +3,31 @@
 
 struct Node
 {
-    int id, key;
+    int id, key, idx;
 };
 
 struct MaxHeap
 {
     std::vector<Node> a;
 
-    void insert(Node v)
+    void build()
     {
-        a.push_back(v);
-        int idx = a.size() - 1;
-        up_heapify(idx);
+        for (int idx = (a.size() / 2) - 1; idx >= 0; --idx)
+        {
+            down_heapify(idx);
+        }
     }
+ 
     Node extract_max()
     {
         Node ret = a[0];
         std::swap(a[0], a[a.size() - 1]);
         a.pop_back();
+        a[0].idx = 0;
         down_heapify(0);
         return ret;
     }
+
     void up_heapify(int i)
     {
         int p;
@@ -31,10 +35,12 @@ struct MaxHeap
         {
             if (a[i].key <= a[p].key)
                 break;
+            std::swap(a[i].idx, a[p].idx);
             std::swap(a[i], a[p]);
             i = p;
         }
     }
+
     void down_heapify(int idx)
     {
         int last_idx = a.size() - 1;
@@ -54,61 +60,96 @@ struct MaxHeap
         if (max_idx != idx)
         {
             std::swap(a[idx], a[max_idx]);
+            std::swap(a[idx].idx, a[max_idx].idx);
             down_heapify(max_idx);
         }
     }
-    int find(int id)
-    {
-        for (int i = 0; i < a.size(); ++i)
-        {
-            if (id == a[i].id)
-                return i;
-        }
-        return -1;
-    }
 
-    void increase_key(int id, int s)
+    void increase_key(Node node, int s)
     {
         if (s <= 0)
             return;
-        int idx = find(id);
-        a[idx].key += s;
-        up_heapify(idx);
+        a[node.idx].key += s;
+        up_heapify(node.idx);
     }
 };
 
 int stoer_wagner(Graph g)
 {
-    int k = g.n;
     int min_cut = INT_MAX;
-    std::vector<bool> merged(g.n, false);
-    while (k > 1)
+    std::vector<int> v(g.n);
+    for (int k = 0; k < g.n; ++k)
+    {
+        v[k] = k;
+    }
+    while (g.n > 1)
     {
         int max;
         int s = 0, t = 0;
-        MaxHeap q;
-        for (int v = 1; v < g.n; ++v)
+        MaxHeap q{std::vector<Node>(g.n - 1)};
+        for (int k = 1; k < g.n; ++k)
         {
-            if (!merged[v])
-                q.insert(Node{v, g.c[0][v]});
+                q.a[k-1] = Node{k, g.w[0][v[k]], k - 1};
         }
+        q.build();
         while (q.a.size() > 0)
         {
             s = t;
             Node tmp = q.extract_max();
             t = tmp.id;
             max = tmp.key;
-            for (Node &v : q.a)
+            for (Node &node : q.a)
             {
-                q.increase_key(v.id, g.c[v.id][t]);
+                q.increase_key(node, g.w[v[node.id]][v[t]]);
+            }
+        }
+        min_cut = std::min(min_cut, max);
+        for (int k = 0; k < g.n; ++k)
+        {
+            g.w[v[s]][v[k]] += g.w[v[t]][v[k]];
+            g.w[v[k]][v[s]] = g.w[v[s]][v[k]];
+        }
+        v[t] = v[--g.n];
+    }
+    return min_cut;
+}
+
+int stoer_wagner2(Graph g)
+{
+    int min_cut = INT_MAX;
+    std::vector<bool> merged(g.n, false);
+    int k = g.n;
+    while (k > 1)
+    {
+        int max;
+        int s = 0, t = 0;
+        MaxHeap q;
+        q.a.reserve(k-1);
+        for (int v = 1; v < g.n; ++v)
+        {
+                q.a.push_back(Node{v, g.w[0][v], (int) q.a.size()});
+        }
+        q.build();
+        while (q.a.size() > 0)
+        {
+            s = t;
+            Node tmp = q.extract_max();
+            t = tmp.id;
+            max = tmp.key;
+            for (Node &node : q.a)
+            {
+                q.increase_key(node, g.w[node.id][t]);
             }
         }
         min_cut = std::min(min_cut, max);
         merged[t] = true;
         for (int v = 0; v < g.n; ++v)
         {
-            g.c[s][v] += g.c[t][v];
-            g.c[v][s] = g.c[s][v];
+            if (!merged[v])
+            {
+                g.w[s][v] += g.w[t][v];
+                g.w[v][s] = g.w[s][v];
+            }
         }
         --k;
     }

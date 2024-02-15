@@ -8,7 +8,8 @@
 struct Graph
 {
     int n, m;
-    std::vector<std::vector<int>> c;
+    std::vector<std::vector<int>> w;
+    std::vector<int> d;
 };
 
 Graph file_to_graph(std::string path)
@@ -31,30 +32,25 @@ Graph file_to_graph(std::string path)
         std::cerr << ("Error, first line does not contain node and edge count") << std::endl;
         exit(EXIT_FAILURE);
     }
-    auto c = std::vector<std::vector<int>>(n, std::vector<int>(n, 0));
-    int src, dest, weight;
+    auto w = std::vector<std::vector<int>>(n, std::vector<int>(n, 0));
+    int from, to, weight;
     while (std::getline(file, line))
     {
-            int vals[3];
-            int i;
-            for (i = 0; i < 3 && line.length() > 0; ++i)
-            {
-                int pos = line.find(" ");
-                vals[i] = std::stoi(line.substr(0, pos));
-                line.erase(0, pos + 1);
-            }
-            if (i < 3) vals[2] = 1;
-            src = vals[0]; dest = vals[1]; weight = vals[2];
-            if (src == dest) continue;
-            if (c[src][dest] == 0)
-            {
-                c[src][dest] = weight;
-            }
-            else
-            {
-                c[src][dest] += weight; 
-            }
-            c[dest][src] = c[src][dest];
+        std::istringstream st(line);
+        if (!(st >> from >> to >> weight))
+        {
+            std::cerr << ("Error, format is wrong") << std::endl;
+            exit(EXIT_FAILURE);
+        }
+        w[from][to] = w[to][from] = weight; 
     }
-    return Graph{n, m, c};
+    auto d = std::vector<int>(n, 0);
+    for (int u = 0; u < n; ++u)
+    {
+        for (int v = 0; v < n; ++v)
+        {
+            d[u] += w[u][v];
+        }
+    }
+    return Graph{n, m, w, d};
 }

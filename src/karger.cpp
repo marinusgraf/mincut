@@ -1,4 +1,5 @@
 #include "karger.h"
+#include "timer.h"
 
 int main(int argc, char** argv)
 {
@@ -9,22 +10,6 @@ int main(int argc, char** argv)
         exit(EXIT_FAILURE);
     }
     Graph g = file_to_graph(std::string{argv[1]});
-    /*
-    int n = g.n;
-    long reps = n * n * log(n) + 1;
-    int nb_threads = std::thread::hardware_concurrency();
-    long reps_per_thread = std::ceil(reps / nb_threads) + 1;
-    std::atomic<int> min_cut{INT_MAX};
-    std::thread threads[nb_threads];
-    for (int i = 0; i < nb_threads; ++i)
-    {
-        threads[i] = std::thread{thread_work, karger, g, reps_per_thread, std::ref(min_cut)};
-    }
-    for (int i = 0; i < nb_threads; ++i)
-    {
-        threads[i].join();
-    }
-    std::cout << min_cut << std::endl;
-    */
-    std::cout << karger(g) << std::endl;
+    int reps = g.n * g.n * log(g.n) + 1;
+    time_function<Graph>(karger, g, reps);
 }

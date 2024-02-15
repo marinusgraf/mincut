@@ -1,4 +1,5 @@
-#include "dinic.h"
+#include "dinitz.h"
+#include "timer.h"
 
 int main(int argc, char** argv)
 {
@@ -7,7 +8,6 @@ int main(int argc, char** argv)
         std::cout << "invalid input" << std::endl;
         exit(EXIT_FAILURE);
     }
-    Graph g = file_to_graph(std::string{argv[1]});
-    std::cout << dinic(g) << std::endl;
-    
+    Network g = file_to_network(std::string{argv[1]});
+    time_function<Network>(dinitz, g);
 }

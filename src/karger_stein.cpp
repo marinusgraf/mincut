@@ -1,17 +1,17 @@
 #include "karger.h"
+#include "timer.h"
 
 int main(int argc, char** argv)
 {
-    
+
     if (argc != 2) 
     {
         std::cout << "invalid or no input path" << std::endl;
         exit(EXIT_FAILURE);
     }
     Graph g = file_to_graph(std::string{argv[1]});
-    /*
-    int n = g.n;
-    long reps = log(n) * log(n) + 1;
+    int reps = std::ceil(log(g.n)) * std::ceil(log(g.n));
+    /*    
     int nb_threads = std::thread::hardware_concurrency();
     long reps_per_thread = std::ceil(reps / nb_threads) + 1;
     std::atomic<int> min_cut{INT_MAX};
@@ -26,5 +26,7 @@ int main(int argc, char** argv)
     }
     std::cout << min_cut << std::endl;
     */
-    std::cout << karger_stein(g) << std::endl;
+    //std::vector<int> w = {0, 10, 100, 200, 150, 30, 4};
+    //std::cout << random_index(w) << std::endl;
+    time_function<Graph>(karger, g, reps);
 }

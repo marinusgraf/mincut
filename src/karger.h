@@ -1,157 +1,74 @@
 #pragma once
-#include <vector>
-#include <fstream>
-#include <sstream>
-#include <iostream>
-#include <algorithm>
-#include <thread>
+#include "adjmat.h"
 #include <random>
-
-struct Edge 
-{
-    int from, to;
-};
-
-struct Graph
-{
-    int n;
-    std::vector<Edge> e;
-    std::vector<int> w, parent, rank;
-
-    Graph(int n) : n{n}
-    {
-        parent.reserve(n);
-        rank.reserve(n);
-        for (int i = 0; i < n; ++i)
-        {
-            parent.push_back(i);
-            rank.push_back(0);
-        }
-    }
-
-    int find(int x)
-    {
-        while (x != parent[x])
-        {
-            parent[x] = parent[parent[x]];
-            x = parent[x];
-        }
-        return x;
-    }
-
-    void link(int x, int y)
-    {
-        x = find(x);
-        y = find(y);
-        if (x == y)
-            return;
-
-        if (rank[x] < rank[y])
-        {
-            std::swap(x, y);
-        }
-
-        parent[y] = x;
-        if (rank[x] == rank[y])
-        {
-            rank[x] += 1;
-        }
-        --n;
-    }
-
-};
-
-Graph file_to_graph(std::string path)
-{
-    std::ifstream file(path);
-    if (!file)
-    {
-        std::cerr << "Error: could not open file" << std::endl;
-        exit(EXIT_FAILURE);
-    }
-    std::string line;
-    while (std::getline(file, line))
-    {
-        if (line[0] != '#')
-            break;
-    }
-    int n, m;
-    std::istringstream st(line);
-    if (!(st >> n >> m))
-    {
-        std::cerr << ("Error, first line does not contain node and edge count") << std::endl;
-        exit(EXIT_FAILURE);
-    }
-    Graph g{n};
-    g.e = std::vector<Edge>(m);
-    g.w = std::vector<int>(m);
-    int src, dest, weight;
-    for (int k = 0; std::getline(file, line) && k < m; ++k)
-    {
-        int vals[3];
-        int i;
-        for (i = 0; i < 3 && line.length() > 0; ++i)
-        {
-            int pos = line.find(" ");
-            vals[i] = std::stoi(line.substr(0, pos));
-            line.erase(0, pos + 1);
-        }
-        if (i < 3)
-            vals[2] = 1;
-        src = vals[0];
-        dest = vals[1];
-        weight = vals[2];
-        if (src == dest)
-            continue; // ignore self edges
-        g.e[k] = Edge{src, dest};
-        g.w[k] = weight;
-    }
-    return g;
-}
 
 Graph contract(Graph g, int t)
 {
-    int idx;
-    int m = g.e.size();
-    auto self_edge = [&g](Edge e)
+    std::vector<bool> merged(g.n, false);
+    static std::mt19937 engine(std::random_device{}());
+    std::vector<int> p(g.n);
+    for (int k = 0; k < g.n; ++k)
     {
-        return g.find(e.from) == g.find(e.to);
-    };
-    static std::default_random_engine engine{std::random_device{}()};
-    std::discrete_distribution<> dist{g.w.begin(), g.w.end()};
+        p[k] = k;
+    }
+    int u, v;
     while (g.n != t)
     {
-        idx = dist(engine);
-        g.link(g.e[idx].from, g.e[idx].to);
+        u = std::discrete_distribution<int>{g.d.begin(), g.d.end()}(engine);
+        v = std::discrete_distribution<int>{g.w[u].begin(), g.w[u].end()}(engine);
+        g.d[u] = g.d[u] + g.d[v] - 2*g.w[u][v];
+        g.d[v] = g.w[u][v] = g.w[v][u] = 0;
+        for (int w = 0; w < g.n; ++w)
+        {
+            if (w == u || w == v) continue;
+            g.w[u][w] += g.w[v][w];
+            g.w[w][u] += g.w[w][v];
+            g.w[v][w] = g.w[w][v] = 0;
+        }
+        p[v] = p[--g.n];
     }
-    int i = 0;
-    while (i < m)
+    auto w = std::vector<std::vector<int>>(n,std::vector<int>(n));
+    auto d = std::vector<int>(n);
+    int new_row = 0, new_col = 0;
+    for (int old_row = 0; old_row < g.n && new_row < n; ++old_row)
     {
-        if (self_edge(g.e[i]))
+        if (merged[old_row])
         {
-            --m;
-            g.e[i] = g.e[m];
-            g.w[i] = g.w[m];
+            continue;
         }
-        else
+        new_col = 0;
+        for (int old_col = 0; old_col < g.n && new_col < n; ++old_col)
         {
-            ++i;
+            if(merged[old_col])
+            {
+                continue;
+            }
+            w[new_row][new_col] = g.w[old_row][old_col];
+            ++new_col;
         }
+        ++new_row;
     }
-    g.e.resize(i);
-    g.w.resize(i);
+    int k = 0;
+    for (int i = 0; i < g.n; ++i)
+    {
+        if(merged[i])
+        {
+            continue;
+        }
+        d[k] = g.d[i];
+        ++k;
+    }
+    g.n = n;
+    g.w = w;
+    g.d = d;
     return g;
+    
 }
 
 int karger(Graph g)
 {
     g = contract(g, 2);
-    int res = 0;
-    for (int i = 0; i < g.w.size(); ++i)
-    {
-        res += g.w[i];
-    }
-    return res;
+    return g.w[0][1];
 }
 
 int karger_stein(Graph g)
@@ -163,16 +80,10 @@ int karger_stein(Graph g)
     else
     {
         int t = std::ceil(g.n / std::sqrt(2) + 1);
-        return std::min(
+        return std::min
+        (
             karger_stein(contract(g, t)),
-            karger_stein(contract(g, t)));
-    }
-}
-
-void thread_work(int (*func)(Graph g), Graph g, const int repetitions, std::atomic<int> &result)
-{
-    for (int i = 0; i < repetitions; ++i)
-    {
-        result = std::min(result.load(), func(g));
+            karger_stein(contract(g, t))
+        );
     }
 }

@@ -1,4 +1,5 @@
 #include "stoer_wagner.h"
+#include "timer.h"
 
 int main(int argc, char **argv)
 {
@@ -7,6 +8,6 @@ int main(int argc, char **argv)
         std::cout << "invalid input" << std::endl;
         exit(EXIT_FAILURE);
     }
-    Graph g =file_to_graph(std::string{argv[1]});
-    std::cout << stoer_wagner(g) << std::endl;
+    Graph g = file_to_graph(std::string{argv[1]});
+    time_function<Graph>(stoer_wagner2, g);
 }

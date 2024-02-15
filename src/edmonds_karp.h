@@ -1,29 +1,32 @@
 #pragma once
-#include "adjmat.h"
+#include "network.h"
 
-int bfs(Graph &g, std::vector<int> &p, int s, int t)
+int bfs(Network &g, std::vector<int> &p, int s, int t)
 {
-    std::vector<int> curr = {s}, next, f(g.n, -1);
+    std::vector<int> curr = {s}, next, flow(g.n, -1);
     std::vector<bool> vis(g.n, false);
     vis[s] = true;
+    int v, cap;
     while (curr.size() > 0)
     {
         next = {};
         for (int &u : curr)
         {
-            for (int v = 0; v < g.n; ++v)
+            for (int &idx : g.adj[u])
             {
-                if (g.c[u][v] > 0 && !vis[v])
+                v = g.e[idx].to;
+                cap = g.e[idx].cap;
+                if (cap > 0 && !vis[v])
                 {
                     if (u == s)
                     {
-                        f[v] = g.c[u][v];
+                        flow[v] = cap;
                     }
                     else
                     {
-                        f[v] = std::min(f[u], g.c[u][v]);
+                        flow[v] = std::min(flow[u], cap);
                     }
-                    p[v] = u;
+                    p[v] = idx;
                     vis[v] = true;
                     next.push_back(v);
                 }
@@ -31,26 +34,26 @@ int bfs(Graph &g, std::vector<int> &p, int s, int t)
         }
         curr = next;
     }
-    return f[t];
+    return flow[t];
 }
 
-int st_maxflow(Graph g, int s, int t)
+int st_maxflow(Network g, int s, int t)
 {
     int f, m = 0;
-    std::vector<int> p(g.n, -1), d;
+    std::vector<int> p(g.n, -1);
     while ((f = bfs(g, p, s, t)) > 0)
     {
         m += f;
-        for (int v = t; v != s; v = p[v])
+        for (int v = t; v != s; v = g.e[p[v]].from)
         {
-            g.c[p[v]][v] -= f;
-            g.c[v][p[v]] += f;
+            g.e[p[v]].cap -= f;
+            g.e[p[v] ^ 1].cap += f;
         }
     }
     return m;
 }
 
-int edmonds_karps(Graph &g)
+int edmonds_karp(Network g)
 {
     int mincut = INT_MAX;
     for (int t = 1; t < g.n; ++t)
