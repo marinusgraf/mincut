@@ -1,7 +1,5 @@
-#pragma once
 #include "adjmat.h"
 #include "timer.h"
-#include <thread>
 #include <random>
 
 inline Graph contract(Graph &g, int t)

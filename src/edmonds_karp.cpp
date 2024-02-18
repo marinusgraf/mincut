@@ -71,6 +71,5 @@ int main(int argc, char** argv)
         exit(EXIT_FAILURE);
     }
     Network g = file_to_network(std::string{argv[1]});
-    //st_maxflow(g, 0, 4);
     time_function(edmonds_karp, g);
 }
