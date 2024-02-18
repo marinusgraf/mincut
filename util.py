@@ -27,9 +27,6 @@ def run(alg):
 
 def helper(alg, n):
     match alg.name:
-        case 'Karger':
-            if n <= 50:
-                return run(alg)
         case 'Edmonds-Karp':
             if n <= 5000:
                 return run(alg)
@@ -81,9 +78,3 @@ def print_output(alg, result, time):
             -mincut value: {result.stdout.rstrip()}
             -time taken: {time:.2f} seconds""")
     
-
-"""
-algs = [Algorithm('Karger', ['./karger', '']),
-        Algorithm('Karger-Stein', ['./karger_stein', '']),
-        Algorithm('Stoer-Wagner', ['./stoer_wagner', ''])]
-"""
