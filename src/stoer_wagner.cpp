@@ -9,5 +9,5 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
     Graph g = file_to_graph(std::string{argv[1]});
-    time_function<Graph>(stoer_wagner2, g);
+    time_function<Graph>(stoer_wagner, g);
 }
