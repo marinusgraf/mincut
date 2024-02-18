@@ -2,7 +2,7 @@
 
 C++23 implementations and tests of different algorithms for finding the global min-cut in weighted, undirected graphs.
 
-1. Karger's and Karger-Stein's Algorithm
+1. Karger's and Karger-Stein's Algorithm (2 Implementations using Adjacency Matrix or Union-Find)
 2. Stoer-Wagner's Algorithm
 3. Edmonds-Karp's Algorithm
 4. Dinitz' Algorithm
