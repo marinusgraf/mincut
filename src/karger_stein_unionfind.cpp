@@ -23,12 +23,11 @@ struct UnionFind
 
     int find(int x)
     {
-        while (x != parent[x])
+        if (x != parent[x])
         {
-            parent[x] = parent[parent[x]];
-            x = parent[x];
+            parent[x] = find(x);
         }
-        return x;
+        return parent[x];
     }
 
     bool link(int x, int y)
