@@ -25,9 +25,10 @@ struct UnionFind
     {
         if (x != parent[x])
         {
-            parent[x] = find(x);
+            parent[x] = find(parent[x]);
+            return parent[x];
         }
-        return parent[x];
+        return x;
     }
 
     bool link(int x, int y)
