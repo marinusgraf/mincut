@@ -61,19 +61,30 @@ inline int karger(Graph g)
 
 inline int karger_stein(Graph g)
 {
-    if (g.n <= 6)
+    
+    int min_cut = INT_MAX;
+    int t;
+    const double invsq = 1 / std::sqrt(2);
+    std::vector<Graph> stack;
+    stack.reserve(3 * log(g.n));
+    stack.push_back(g);
+    while (stack.size() > 0)
     {
-        return karger(g);
+        Graph g = stack[stack.size() - 1];
+        stack.pop_back();
+        if (g.n <= 6)
+        {
+            min_cut = std::min(min_cut, karger(g));
+        }
+        else 
+        {
+            t = invsq * g.n;
+            stack.push_back(contract(g, t));
+            stack.push_back(contract(g, t));
+        }
     }
-    else
-    {
-        int t = std::ceil(g.n / std::sqrt(2) + 1);
-        return std::min
-        (
-            karger_stein(contract(g, t)),
-            karger_stein(contract(g, t))
-        );
-    }
+    return min_cut;
+    
 }
 
 int main(int argc, char** argv)
@@ -85,6 +96,7 @@ int main(int argc, char** argv)
         exit(EXIT_FAILURE);
     }
     Graph g = file_to_graph(std::string{argv[1]});
+    int karger_reps = g.n * g.n * log(g.n);
     int reps = log(g.n) * log(g.n);
     time_function(karger_stein, g, reps);
 }

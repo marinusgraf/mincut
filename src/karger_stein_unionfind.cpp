@@ -103,7 +103,7 @@ Graph file_to_graph(std::string path)
     return Graph{n, m, std::move(e), std::move(w)};
 }
 
-Graph contract(Graph &g, const int t)
+inline Graph contract(Graph &g, const int t)
 {
     UnionFind uf{g.n};
     static std::default_random_engine engine{std::random_device{}()};
@@ -160,17 +160,28 @@ int karger(Graph g)
 
 int karger_stein(Graph g)
 {
-    if (g.n <= 6)
+    int min_cut = INT_MAX;
+    int t;
+    const double invsq = 1 / std::sqrt(2);
+    std::vector<Graph> stack;
+    stack.reserve(3 * log(g.n));
+    stack.push_back(g);
+    while (stack.size() > 0)
     {
-        return karger(g);
+        Graph g = stack[stack.size() - 1];
+        stack.pop_back();
+        if (g.n <= 6)
+        {
+            min_cut = std::min(min_cut, karger(g));
+        }
+        else 
+        {
+            t = invsq * g.n;
+            stack.push_back(contract(g, t));
+            stack.push_back(contract(g, t));
+        }
     }
-    else
-    {
-        int t = std::ceil(g.n / std::sqrt(2) + 1);
-        return std::min(
-            karger_stein(contract(g, t)),
-            karger_stein(contract(g, t)));
-    }
+    return min_cut;
 }
 
 int main(int argc, char **argv)
