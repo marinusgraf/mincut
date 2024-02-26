@@ -74,7 +74,7 @@ struct MaxHeap
     }
 };
 
-int stoer_wagner(Graph g)
+int stoer_wagner(Graph &g)
 {
     int min_cut = INT_MAX;
     std::vector<int> v(g.n);

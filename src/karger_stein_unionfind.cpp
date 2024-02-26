@@ -4,13 +4,15 @@
 #include <fstream>
 #include <sstream>
 #include <random>
+#include <algorithm>
 #include "timer.h"
+
 
 struct UnionFind
 {
     std::vector<int> parent, rank;
-
-    UnionFind(int n)
+    int sets;
+    UnionFind(int n) : sets{n}
     {
         parent = std::vector<int>(n);
         rank = std::vector<int>(n);
@@ -48,23 +50,30 @@ struct UnionFind
         {
             rank[x] += 1;
         }
+        --sets;
         return true;
     }
 };
 
+union Score
+{
+    float f;
+    uint32_t x;
+};
+
 struct Edge
 {
-    int from, to;
+    int from, to, weight;
+    Score s;
 };
 
 struct Graph
 {
     int n, m;
     std::vector<Edge> e;
-    std::vector<int> w;
 };
 
-Graph file_to_graph(std::string path)
+Graph file_to_graph(const std::string path)
 {
     std::ifstream file(path);
     if (!file)
@@ -97,26 +106,16 @@ Graph file_to_graph(std::string path)
             std::cerr << ("Error, first line does not contain node and edge count") << std::endl;
             exit(EXIT_FAILURE);
         }
-        e[k] = Edge{from, to};
-        w[k] = weight;
+        e[k] = Edge{from, to, weight};
     }
-    return Graph{n, m, std::move(e), std::move(w)};
+    return Graph{n, m, e};
 }
 
-inline Graph contract(Graph &g, const int t)
+void relabel(Graph &g, UnionFind &uf, const int first_idx)
 {
-    UnionFind uf{g.n};
-    static std::default_random_engine engine{std::random_device{}()};
-    int rand_idx;
-    std::discrete_distribution<int> dist{g.w.begin(), g.w.end()};
+    int new_size = uf.sets;
     auto label = std::vector<int>(g.n, -1);
-
-    while (g.n != t)
-    {
-        rand_idx = dist(engine);
-        g.n -= uf.link(g.e[rand_idx].from, g.e[rand_idx].to);
-    }
-    for (int k = 0, j = 0; j < g.n; ++k)
+    for (int k = 0, j = 0; j < new_size; ++k)
     {
         if (uf.parent[k] == k)
         {
@@ -126,73 +125,124 @@ inline Graph contract(Graph &g, const int t)
     }
     auto map = std::vector<std::vector<int>>(g.n, std::vector<int>(g.n, -1));
     auto e = std::vector<Edge>();
-    auto w = std::vector<int>();
-    e.reserve(g.n * g.n);
-    w.reserve(g.n * g.n);
+    e.reserve(g.e.size() - first_idx);
     int from, to;
     int idx;
-    for (int k = 0; k < g.e.size(); ++k)
+    for (int i = first_idx; i < g.e.size(); ++i)
     {
-        from = label[uf.find(g.e[k].from)];
-        to = label[uf.find(g.e[k].to)];
+        from = label[uf.find(g.e[i].from)];
+        to = label[uf.find(g.e[i].to)];
         if (from == to)
             continue;
         if ((idx = map[from][to]) != -1)
         {
-            w[idx] += g.w[k];
+            e[idx].weight += g.e[i].weight;
         }
         else
         {
-            e.push_back(Edge{from, to});
-            w.push_back(g.w[k]);
+            e.push_back(Edge{from, to, g.e[i].weight, Score{0}});
             map[from][to] = map[to][from] = e.size() - 1;
         }
     }
+    g.n = new_size;
     g.e = e;
-    g.w = w;
-    return g;
 }
 
-int karger(Graph g)
+void insertion_sort(std::vector<Edge> &arr, const int n)
 {
-    return contract(g, 2).w[0];
-}
-
-int karger_stein(Graph g)
-{
-    int min_cut = INT_MAX;
-    int t;
-    const double invsq = 1 / std::sqrt(2);
-    std::vector<Graph> stack;
-    stack.reserve(3 * log(g.n));
-    stack.push_back(g);
-    while (stack.size() > 0)
+    for (int k = 1; k < n; ++k)
     {
-        Graph g = stack[stack.size() - 1];
-        stack.pop_back();
-        if (g.n <= 6)
+        for (int j = k; j > 0 && arr[j-1].s.f > arr[j].s.f; --j)
         {
-            min_cut = std::min(min_cut, karger(g));
-        }
-        else 
-        {
-            t = invsq * g.n;
-            stack.push_back(contract(g, t));
-            stack.push_back(contract(g, t));
+            std::swap(arr[j], arr[j-1]);
         }
     }
-    return min_cut;
+}
+
+void radix_sort (std::vector<Edge> &arr, const int n)
+{
+    if (n < 32)
+    {
+        insertion_sort(arr, n);
+        return;
+    }
+    for (int r = 0; r < 32; r += 8)
+    {
+        int count[256] = {0};
+        std::vector<Edge> tmp(n);
+
+        for (int k = 0; k < n; ++k)
+        {
+            count[(arr[k].s.x >> r) & 0xff]++;
+        }
+        for (int k = 1; k < 256; ++k)
+        {
+            count[k] += count[k-1];
+        }
+        for (int k = n-1; k >= 0 ; --k)
+        {
+            tmp[--count[(arr[k].s.x >> r) & 0xff]] = arr[k];
+        }
+        for (int k = 0; k < n; ++k)
+        {
+            arr[k] = tmp[k];
+        }
+    }
+}
+
+void contract(Graph &g, const int t)
+{
+    static std::mt19937 engine{std::random_device{}()};
+    UnionFind uf{g.n};
+    for (Edge &e : g.e)
+    {
+        float unif = std::uniform_real_distribution<float>{0.0, 1.0}(engine);
+        float tmp =  1 - std::pow(1 - unif, (float) 1 / e.weight);
+        e.s = Score{tmp};
+    }
+    radix_sort(g.e, g.e.size());
+    int k = 0;
+    for (; uf.sets != t; ++k)
+    {
+        uf.link(g.e[k].from, g.e[k].to);
+    }
+    relabel(g, uf, k);
+}
+
+
+int karger(Graph &g)
+{
+    contract(g, 2);
+    return g.e[0].weight;
+}
+
+int karger_stein(Graph &g)
+{
+    if (g.n <= 6)
+    {
+        return karger(g);
+    }
+    else 
+    {
+        int t;
+        const double invsq = 1 / std::sqrt(2);
+        t = invsq * g.n;
+        Graph h{g};
+        contract(g, t);
+        contract(h, t);
+        return std::min(karger_stein(g), karger_stein(h));
+    }
 }
 
 int main(int argc, char **argv)
 {
-
     if (argc != 2)
     {
         std::cout << "invalid input" << std::endl;
         exit(EXIT_FAILURE);
     }
     Graph g = file_to_graph(std::string{argv[1]});
-    int reps = log(g.n) * log(g.n);
-    time_function(karger_stein, g, reps);
+    //int karger_reps = g.n * g.n * log(g.n);
+    int karger_stein_reps = log(g.n) * log(g.n);
+    time_function(karger_stein, g, karger_stein_reps);
 }

@@ -71,7 +71,7 @@ int st_maxflow(Network g, int s, int t)
     return m;
 }
 
-int dinitz(Network g)
+int dinitz(Network &g)
 {
     int mincut = INT_MAX;
     for (int t = 1; t < g.n; ++t)

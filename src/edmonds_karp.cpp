@@ -53,7 +53,7 @@ int st_maxflow(Network g, int s, int t)
     return m;
 }
 
-int edmonds_karp(Network g)
+int edmonds_karp(Network &g)
 {
     int mincut = INT_MAX;
     for (int t = 1; t < g.n; ++t)
