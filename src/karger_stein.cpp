@@ -3,7 +3,7 @@
 #include "adjmat.h"
 #include "timer.h"
 
-int rand_idx(const std::vector<int> &arr, const std::vector<int> &v) {
+int rand_idx(const std::vector<int>& arr, const std::vector<int>& v) {
   int n = arr.size();
   static std::mt19937 engine(std::random_device{}());
   std::vector<int> acc = std::vector<int>(n, 0);
@@ -33,7 +33,7 @@ int rand_idx(const std::vector<int> &arr, const std::vector<int> &v) {
   return -1;
 }
 
-void contract(Graph &g, const int t) {
+void contract(Graph& g, const int t) {
   static std::mt19937 engine{std::random_device{}()};
   std::vector<int> v(g.n);
   for (int k = 0; k < g.n; ++k) {
@@ -73,12 +73,12 @@ void contract(Graph &g, const int t) {
   g.d = d;
 }
 
-int karger(Graph &g) {
+int karger(Graph& g) {
   contract(g, 2);
   return g.w[0][1];
 }
 
-int karger_stein(Graph &g) {
+int karger_stein(Graph& g) {
   if (g.n <= 6) {
     return karger(g);
   } else {
@@ -92,7 +92,7 @@ int karger_stein(Graph &g) {
   }
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   if (argc != 2) {
     std::cout << "invalid or no input path" << std::endl;
     exit(EXIT_FAILURE);

@@ -4,7 +4,7 @@
 #include <iostream>
 
 template <typename T>
-void time_function(int (*func)(T &g), T &g, int reps = 1) {
+void time_function(int (*func)(T& g), T& g, int reps = 1) {
   clock_t start, end;
   start = clock();
   int result = func(g);

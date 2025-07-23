@@ -94,7 +94,7 @@ Graph file_to_graph(const std::string path) {
   return Graph{n, m, e};
 }
 
-void relabel(Graph &g, UnionFind &uf, const int first_idx) {
+void relabel(Graph& g, UnionFind& uf, const int first_idx) {
   int new_size = uf.sets;
   auto label = std::vector<int>(g.n, -1);
   for (int k = 0, j = 0; j < new_size; ++k) {
@@ -123,7 +123,7 @@ void relabel(Graph &g, UnionFind &uf, const int first_idx) {
   g.e = e;
 }
 
-void insertion_sort(std::vector<Edge> &arr, const int n) {
+void insertion_sort(std::vector<Edge>& arr, const int n) {
   for (int k = 1; k < n; ++k) {
     for (int j = k; j > 0 && arr[j - 1].s.f > arr[j].s.f; --j) {
       std::swap(arr[j], arr[j - 1]);
@@ -131,7 +131,7 @@ void insertion_sort(std::vector<Edge> &arr, const int n) {
   }
 }
 
-void radix_sort(std::vector<Edge> &arr, const int n) {
+void radix_sort(std::vector<Edge>& arr, const int n) {
   if (n < 32) {
     insertion_sort(arr, n);
     return;
@@ -155,10 +155,10 @@ void radix_sort(std::vector<Edge> &arr, const int n) {
   }
 }
 
-void contract(Graph &g, const int t) {
+void contract(Graph& g, const int t) {
   static std::mt19937 engine{std::random_device{}()};
   UnionFind uf{g.n};
-  for (Edge &e : g.e) {
+  for (Edge& e : g.e) {
     float unif = std::uniform_real_distribution<float>{0.0, 1.0}(engine);
     float tmp = 1 - std::pow(1 - unif, (float)1 / e.weight);
     e.s = Score{tmp};
@@ -171,12 +171,12 @@ void contract(Graph &g, const int t) {
   relabel(g, uf, k);
 }
 
-int karger(Graph &g) {
+int karger(Graph& g) {
   contract(g, 2);
   return g.e[0].weight;
 }
 
-int karger_stein(Graph &g) {
+int karger_stein(Graph& g) {
   if (g.n <= 6) {
     return karger(g);
   } else {
@@ -190,7 +190,7 @@ int karger_stein(Graph &g) {
   }
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   if (argc != 2) {
     std::cout << "invalid input" << std::endl;
     exit(EXIT_FAILURE);

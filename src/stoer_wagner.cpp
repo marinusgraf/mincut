@@ -59,7 +59,7 @@ struct MaxHeap {
   }
 };
 
-int stoer_wagner(Graph &g) {
+int stoer_wagner(Graph& g) {
   int min_cut = INT_MAX;
   std::vector<int> v(g.n);
   for (int k = 0; k < g.n; ++k) {
@@ -78,7 +78,7 @@ int stoer_wagner(Graph &g) {
       Node tmp = q.extract_max();
       t = tmp.id;
       max = tmp.key;
-      for (Node &node : q.a) {
+      for (Node& node : q.a) {
         q.increase_key(node, g.w[v[node.id]][v[t]]);
       }
     }
@@ -92,7 +92,7 @@ int stoer_wagner(Graph &g) {
   return min_cut;
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   if (argc != 2) {
     std::cout << "invalid input" << std::endl;
     exit(EXIT_FAILURE);

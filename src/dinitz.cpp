@@ -1,13 +1,13 @@
 #include "network.h"
 #include "timer.h"
 
-std::vector<int> level(Network &g, int s) {
+std::vector<int> level(Network& g, int s) {
   std::vector<int> frontier = {s}, next, l(g.n, -1);
   l[s] = 0;
   int v;
   for (int level = 1; frontier.size() > 0; ++level) {
     next = {};
-    for (int &u : frontier) {
+    for (int& u : frontier) {
       for (int idx : g.adj[u]) {
         v = g.e[idx].to;
         if (g.e[idx].cap > 0 && l[v] == -1) {
@@ -21,14 +21,14 @@ std::vector<int> level(Network &g, int s) {
   return l;
 }
 
-int dfs(Network &g, std::vector<int> &l, int flow, int u, int t) {
+int dfs(Network& g, std::vector<int>& l, int flow, int u, int t) {
   if (u == t) {
     return flow;
   }
   int v;
   for (int idx : g.adj[u]) {
-    int &cap = g.e[idx].cap;
-    int &r_cap = g.e[idx ^ 1].cap;
+    int& cap = g.e[idx].cap;
+    int& r_cap = g.e[idx ^ 1].cap;
     v = g.e[idx].to;
     if (cap > 0 && l[v] == l[u] + 1) {
       int push = std::min(flow, cap);
@@ -56,7 +56,7 @@ int st_maxflow(Network g, int s, int t) {
   return m;
 }
 
-int dinitz(Network &g) {
+int dinitz(Network& g) {
   int mincut = INT_MAX;
   for (int t = 1; t < g.n; ++t) {
     mincut = std::min(mincut, st_maxflow(g, 0, t));
@@ -64,7 +64,7 @@ int dinitz(Network &g) {
   return mincut;
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   if (argc != 2) {
     std::cout << "invalid input" << std::endl;
     exit(EXIT_FAILURE);

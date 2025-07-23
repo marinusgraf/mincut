@@ -1,15 +1,15 @@
 #include "network.h"
 #include "timer.h"
 
-int bfs(Network &g, std::vector<int> &p, int s, int t) {
+int bfs(Network& g, std::vector<int>& p, int s, int t) {
   std::vector<int> curr = {s}, next, flow(g.n, -1);
   std::vector<bool> vis(g.n, false);
   vis[s] = true;
   int v, cap;
   while (curr.size() > 0) {
     next = {};
-    for (int &u : curr) {
-      for (int &idx : g.adj[u]) {
+    for (int& u : curr) {
+      for (int& idx : g.adj[u]) {
         v = g.e[idx].to;
         cap = g.e[idx].cap;
         if (cap > 0 && !vis[v]) {
@@ -42,7 +42,7 @@ int st_maxflow(Network g, int s, int t) {
   return m;
 }
 
-int edmonds_karp(Network &g) {
+int edmonds_karp(Network& g) {
   int mincut = INT_MAX;
   for (int t = 1; t < g.n; ++t) {
     mincut = std::min(mincut, st_maxflow(g, 0, t));
@@ -50,7 +50,7 @@ int edmonds_karp(Network &g) {
   return mincut;
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   if (argc != 2) {
     std::cout << "invalid input" << std::endl;
     exit(EXIT_FAILURE);
